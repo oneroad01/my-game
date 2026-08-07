@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
+
+<title>横スクロールゲーム</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: skyblue;
+  font-family: sans-serif;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* =========================
+   ゲーム画面
+========================= */
+
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: skyblue;
+}
+
+#world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3000px;
+  height: 500px;
+}
+
+/* =========================
+   主人公
+========================= */
+
+#player {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background: #e63946;
+  border-radius: 8px;
+  z-index: 5;
+}
+
+/* =========================
+   地面
+========================= */
+
+.ground {
+  position: absolute;
+  left: 0;
+  top: 400px;
+  width: 3000px;
+  height: 150px;
+  background: #38a83b;
+  border-top: 10px solid #66d34f;
+}
+
+/* =========================
+   足場
+========================= */
+
+.platform {
+  position: absolute;
+  height: 20px;
+  background: #8b4513;
+  border-top: 5px solid #b86b32;
+}
+
+/* =========================
+   コイン
+========================= */
+
+.coin {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  background: gold;
+  border: 4px solid #e6a800;
+  border-radius: 50%;
+}
+
+/* =========================
+   敵
+========================= */
+
+.enemy {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: #7a3d10;
+  border-radius: 12px 12px 4px 4px;
+}
+
+/* 敵の目 */
+
+.enemy::before,
+.enemy::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  width: 7px;
+  height: 7px;
+  background: white;
+  border-radius: 50%;
+}
+
+.enemy::before {
+  left: 8px;
+}
+
+.enemy::after {
+  right: 8px;
+}
+
+/* =========================
+   ゴール
+========================= */
+
+#goalPole {
+  position: absolute;
+  left: 2750px;
+  top: 170px;
+  width: 12px;
+  height: 230px;
+  background: white;
+}
+
+#flag {
+  position: absolute;
+  left: 2762px;
+  top: 180px;
+  width: 80px;
+  height: 50px;
+  background: red;
+}
+
+/* =========================
+   スコア
+========================= */
+
+#score {
+  position: fixed;
+  top: 15px;
+  left: 20px;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px black;
+  z-index: 50;
+}
+
+/* =========================
+   ゲームクリア
+========================= */
+
+#message {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+
+  color: white;
+
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  font-size: 50px;
+  font-weight: bold;
+  text-align: center;
+}
+
+#restartButton {
+  margin-top: 30px;
+  padding: 15px 30px;
+
+  border: 3px solid white;
+  border-radius: 15px;
+
+  background: #e63946;
+  color: white;
+
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* =========================
+   スマホ操作
+========================= */
+
+#mobileControls {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 20px;
+  height: 110px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.controlButton {
+  position: absolute;
+
+  width: 80px;
+  height: 80px;
+
+  border-radius: 50%;
+  border: 3px solid white;
+
+  background: rgba(0,0,0,0.45);
+  color: white;
+
+  font-size: 32px;
+  font-weight: bold;
+
+  pointer-events: auto;
+  touch-action: none;
+}
+
+#leftBtn {
+  left: 20px;
+}
+
+#rightBtn {
+  left: 115px;
+}
+
+#jumpBtn {
+  right: 25px;
+
+  width: 100px;
+  height: 100px;
+
+  background: rgba(220,40,40,0.8);
+
+  font-size: 19px;
+}
+
+.controlButton:active {
+  transform: scale(0.92);
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- スコア -->
+
+<div id="score">
+COIN × 0
+</div>
+
+
+<!-- ゲーム -->
+
+<div id="game">
+
+<div id="world">
+
+<!-- 主人公 -->
+
+<div id="player"></div>
+
+
+<!-- 地面 -->
+
+<div class="ground"></div>
+
+
+<!-- 足場 -->
+
+<div class="platform"
+style="left:500px;top:320px;width:150px;">
+</div>
+
+<div class="platform"
+style="left:900px;top:270px;width:150px;">
+</div>
+
+<div class="platform"
+style="left:1400px;top:330px;width:180px;">
+</div>
+
+<div class="platform"
+style="left:2000px;top:290px;width:180px;">
+</div>
+
+<div class="platform"
+style="left:2350px;top:250px;width:180px;">
+</div>
+
+
+<!-- コイン -->
+
+<div class="coin"
+style="left:550px;top:280px;">
+</div>
+
+<div class="coin"
+style="left:950px;top:230px;">
+</div>
+
+<div class="coin"
+style="left:1450px;top:290px;">
+</div>
+
+<div class="coin"
+style="left:2050px;top:250px;">
+</div>
+
+<div class="coin"
+style="left:2400px;top:210px;">
+</div>
+
+
+<!-- 敵 -->
+
+<div class="enemy" id="enemy1"></div>
+
+<div class="enemy" id="enemy2"></div>
+
+<div class="enemy" id="enemy3"></div>
+
+
+<!-- ゴール -->
+
+<div id="goalPole"></div>
+
+<div id="flag"></div>
+
+
+</div>
+</div>
+
+
+<!-- スマホ操作 -->
+
+<div id="mobileControls">
+
+<button
+class="controlButton"
+id="leftBtn">
+←
+</button>
+
+<button
+class="controlButton"
+id="rightBtn">
+→
+</button>
+
+<button
+class="controlButton"
+id="jumpBtn">
+JUMP
+</button>
+
+</div>
+
+
+<!-- クリア画面 -->
+
+<div id="message">
+
+<div>
+🎉 GAME CLEAR! 🎉
+</div>
+
+<div
+id="clearScore"
+style="
+font-size:25px;
+margin-top:20px;
+">
+</div>
+
+<button id="restartButton">
+もう一度
+</button>
+
+</div>
+
+
+<script>
+
+/* =========================
+   基本設定
+========================= */
+
+const world =
+document.getElementById("world");
+
+const player =
+document.getElementById("player");
+
+const platforms =
+document.querySelectorAll(".platform");
+
+const coinElements =
+document.querySelectorAll(".coin");
+
+const scoreDisplay =
+document.getElementById("score");
+
+const message =
+document.getElementById("message");
+
+const clearScore =
+document.getElementById("clearScore");
+
+
+/* =========================
+   プレイヤー
+========================= */
+
+let x = 100;
+let y = 350;
+
+let velocityY = 0;
+
+const gravity = 0.8;
+const jumpPower = -15;
+
+let onGround = true;
+
+
+/* =========================
+   ゲーム状態
+========================= */
+
+let score = 0;
+
+let cameraX = 0;
+
+let gameClear = false;
+
+const keys = {};
+
+
+/* =========================
+   コイン
+========================= */
+
+const coins = [];
+
+coinElements.forEach(function(el) {
+
+  coins.push({
+
+    el: el,
+
+    x: parseInt(el.style.left),
+
+    y: parseInt(el.style.top),
+
+    collected: false
+
+  });
+
+});
+
+
+/* =========================
+   敵
+========================= */
+
+const enemies = [
+
+{
+  el: document.getElementById("enemy1"),
+
+  x: 700,
+  y: 360,
+
+  speed: 2,
+
+  minX: 650,
+  maxX: 850,
+
+  alive: true
+},
+
+{
+  el: document.getElementById("enemy2"),
+
+  x: 1650,
+  y: 360,
+
+  speed: 2,
+
+  minX: 1550,
+  maxX: 1850,
+
+  alive: true
+},
+
+{
+  el: document.getElementById("enemy3"),
+
+  x: 2450,
+  y: 360,
+
+  speed: 2,
+
+  minX: 2300,
+  maxX: 2600,
+
+  alive: true
+}
+
+];
+
+
+/* =========================
+   キーボード
+========================= */
+
+document.addEventListener(
+"keydown",
+function(e) {
+
+  keys[e.key] = true;
+
+  if (
+    e.key === " " &&
+    onGround &&
+    !gameClear
+  ) {
+
+    velocityY = jumpPower;
+
+    onGround = false;
+
+  }
+
+  if (
+    e.key === "ArrowLeft" ||
+    e.key === "ArrowRight" ||
+    e.key === " "
+  ) {
+
+    e.preventDefault();
+
+  }
+
+});
+
+
+document.addEventListener(
+"keyup",
+function(e) {
+
+  keys[e.key] = false;
+
+});
+
+
+/* =========================
+   スマホ操作
+========================= */
+
+const leftBtn =
+document.getElementById("leftBtn");
+
+const rightBtn =
+document.getElementById("rightBtn");
+
+const jumpBtn =
+document.getElementById("jumpBtn");
+
+
+function pressLeft(e) {
+
+  e.preventDefault();
+
+  keys["ArrowLeft"] = true;
+
+}
+
+
+function releaseLeft(e) {
+
+  e.preventDefault();
+
+  keys["ArrowLeft"] = false;
+
+}
+
+
+function pressRight(e) {
+
+  e.preventDefault();
+
+  keys["ArrowRight"] = true;
+
+}
+
+
+function releaseRight(e) {
+
+  e.preventDefault();
+
+  keys["ArrowRight"] = false;
+
+}
+
+
+leftBtn.addEventListener(
+"pointerdown",
+pressLeft
+);
+
+leftBtn.addEventListener(
+"pointerup",
+releaseLeft
+);
+
+leftBtn.addEventListener(
+"pointercancel",
+releaseLeft
+);
+
+
+rightBtn.addEventListener(
+"pointerdown",
+pressRight
+);
+
+rightBtn.addEventListener(
+"pointerup",
+releaseRight
+);
+
+rightBtn.addEventListener(
+"pointercancel",
+releaseRight
+);
+
+
+/* ジャンプ */
+
+jumpBtn.addEventListener(
+"pointerdown",
+function(e) {
+
+  e.preventDefault();
+
+  if (
+    onGround &&
+    !gameClear
+  ) {
+
+    velocityY =
+    jumpPower;
+
+    onGround = false;
+
+  }
+
+});
+
+
+/* =========================
+   当たり判定
+========================= */
+
+function isTouching(
+ax,
+ay,
+aw,
+ah,
+bx,
+by,
+bw,
+bh
+) {
+
+return (
+
+ax < bx + bw &&
+
+ax + aw > bx &&
+
+ay < by + bh &&
+
+ay + ah > by
+
+);
+
+}
+
+
+/* =========================
+   ゲームループ
+========================= */
+
+function gameLoop() {
+
+
+if (!gameClear) {
+
+
+/* -------------------------
+   左右移動
+------------------------- */
+
+if (keys["ArrowRight"]) {
+
+  x += 6;
+
+}
+
+if (keys["ArrowLeft"]) {
+
+  x -= 6;
+
+}
+
+
+if (x < 0) {
+
+  x = 0;
+
+}
+
+if (x > 2950) {
+
+  x = 2950;
+
+}
+
+
+/* -------------------------
+   重力
+------------------------- */
+
+const oldY = y;
+
+velocityY += gravity;
+
+y += velocityY;
+
+onGround = false;
+
+
+/* -------------------------
+   地面
+------------------------- */
+
+if (y >= 350) {
+
+  y = 350;
+
+  velocityY = 0;
+
+  onGround = true;
+
+}
+
+
+/* -------------------------
+   足場
+------------------------- */
+
+platforms.forEach(
+function(platform) {
+
+const px =
+parseInt(platform.style.left);
+
+const py =
+parseInt(platform.style.top);
+
+const pw =
+parseInt(platform.style.width);
+
+
+const playerBottom =
+y + 50;
+
+const oldBottom =
+oldY + 50;
+
+
+const hitX =
+
+x + 50 > px &&
+
+x < px + pw;
+
+
+const falling =
+velocityY >= 0;
+
+
+const crossedTop =
+
+oldBottom <= py &&
+
+playerBottom >= py;
+
+
+if (
+hitX &&
+falling &&
+crossedTop
+) {
+
+  y = py - 50;
+
+  velocityY = 0;
+
+  onGround = true;
+
+}
+
+});
+
+
+/* -------------------------
+   コイン
+------------------------- */
+
+coins.forEach(
+function(coin) {
+
+if (coin.collected) {
+
+  return;
+
+}
+
+
+if (
+isTouching(
+
+x,
+y,
+50,
+50,
+
+coin.x,
+coin.y,
+26,
+26
+
+)
+) {
+
+coin.collected = true;
+
+coin.el.style.display =
+"none";
+
+score++;
+
+scoreDisplay.textContent =
+"COIN × " + score;
+
+}
+
+});
+
+
+/* -------------------------
+   敵
+------------------------- */
+
+enemies.forEach(
+function(enemy) {
+
+
+if (!enemy.alive) {
+
+  return;
+
+}
+
+
+enemy.x += enemy.speed;
+
+
+if (
+enemy.x <= enemy.minX
+) {
+
+enemy.x =
+enemy.minX;
+
+enemy.speed =
+Math.abs(enemy.speed);
+
+}
+
+
+if (
+enemy.x >= enemy.maxX
+) {
+
+enemy.x =
+enemy.maxX;
+
+enemy.speed =
+-Math.abs(enemy.speed);
+
+}
+
+
+enemy.el.style.left =
+enemy.x + "px";
+
+enemy.el.style.top =
+enemy.y + "px";
+
+
+/* プレイヤーと敵 */
+
+if (
+isTouching(
+
+x,
+y,
+50,
+50,
+
+enemy.x,
+enemy.y,
+40,
+40
+
+)
+) {
+
+
+const oldBottom =
+oldY + 50;
+
+
+/* 上から踏んだ */
+
+if (
+velocityY > 0 &&
+oldBottom <=
+enemy.y + 10
+) {
+
+enemy.alive = false;
+
+enemy.el.style.display =
+"none";
+
+velocityY = -10;
+
+score += 3;
+
+scoreDisplay.textContent =
+"COIN × " + score;
+
+}
+
+
+/* 横から当たった */
+
+else {
+
+x = 100;
+
+y = 350;
+
+velocityY = 0;
+
+cameraX = 0;
+
+}
+
+}
+
+});
+
+
+/* -------------------------
+   ゴール
+------------------------- */
+
+if (
+isTouching(
+
+x,
+y,
+50,
+50,
+
+2735,
+170,
+120,
+230
+
+)
+) {
+
+gameClear = true;
+
+message.style.display =
+"flex";
+
+clearScore.textContent =
+"スコア：" + score;
+
+}
+
+}
+
+
+/* =========================
+   主人公表示
+========================= */
+
+player.style.left =
+x + "px";
+
+player.style.top =
+y + "px";
+
+
+/* =========================
+   横スクロール
+========================= */
+
+cameraX =
+x -
+window.innerWidth * 0.35;
+
+
+if (cameraX < 0) {
+
+cameraX = 0;
+
+}
+
+
+const maxCamera =
+3000 -
+window.innerWidth;
+
+
+if (
+cameraX >
+maxCamera
+) {
+
+cameraX =
+Math.max(
+0,
+maxCamera
+);
+
+}
+
+
+world.style.left =
+-cameraX + "px";
+
+
+requestAnimationFrame(
+gameLoop
+);
+
+}
+
+
+/* =========================
+   もう一度
+========================= */
+
+document
+.getElementById("restartButton")
+.addEventListener(
+"click",
+function() {
+
+location.reload();
+
+});
+
+
+/* =========================
+   スタート
+========================= */
+
+gameLoop();
+
+</script>
+
+</body>
+</html>
