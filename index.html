@@ -2,13 +2,17 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+
 <meta name="viewport"
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 
 <title>横スクロールゲーム</title>
 
 <style>
-* { box-sizing:border-box; }
+
+*{
+  box-sizing:border-box;
+}
 
 html,body{
   margin:0;
@@ -51,6 +55,7 @@ html,body{
 
 #heroSprite{
   position:absolute;
+
   width:96px;
   height:128px;
 
@@ -64,10 +69,11 @@ html,body{
   background-position:0% 0;
 
   image-rendering:pixelated;
+
   transform-origin:center bottom;
 }
 
-/* ダメージ中点滅 */
+/* ダメージ点滅 */
 
 .invincible{
   animation:flash 0.12s infinite alternate;
@@ -79,11 +85,57 @@ html,body{
 }
 
 /* =====================
+   剣の攻撃エフェクト
+===================== */
+
+#slash{
+  display:none;
+
+  position:absolute;
+
+  width:70px;
+  height:70px;
+
+  top:-5px;
+
+  z-index:30;
+
+  pointer-events:none;
+}
+
+#slash.right{
+  display:block;
+
+  left:38px;
+
+  border-top:8px solid rgba(255,255,255,0.95);
+  border-right:8px solid rgba(255,230,100,0.95);
+
+  border-radius:50%;
+
+  transform:rotate(35deg);
+}
+
+#slash.left{
+  display:block;
+
+  right:38px;
+
+  border-top:8px solid rgba(255,255,255,0.95);
+  border-left:8px solid rgba(255,230,100,0.95);
+
+  border-radius:50%;
+
+  transform:rotate(-35deg);
+}
+
+/* =====================
    地面
 ===================== */
 
 .ground{
   position:absolute;
+
   left:0;
   top:420px;
 
@@ -91,6 +143,7 @@ html,body{
   height:160px;
 
   background:#8c522b;
+
   border-top:14px solid #56bc42;
 }
 
@@ -100,9 +153,11 @@ html,body{
 
 .platform{
   position:absolute;
+
   height:24px;
 
   background:#87451f;
+
   border-top:6px solid #c9803b;
 }
 
@@ -119,10 +174,11 @@ html,body{
   border-radius:50%;
 
   background:#ffd700;
+
   border:4px solid #dc9900;
 
   box-shadow:
-    inset 4px 0 rgba(255,255,255,.55);
+  inset 4px 0 rgba(255,255,255,.55);
 }
 
 /* =====================
@@ -317,7 +373,7 @@ html,body{
 }
 
 /* =====================
-   スコア・ライフ
+   HUD
 ===================== */
 
 #hud{
@@ -422,7 +478,6 @@ html,body{
 
   color:white;
 
-  font-size:32px;
   font-weight:bold;
 
   pointer-events:auto;
@@ -432,10 +487,23 @@ html,body{
 
 #leftBtn{
   left:20px;
+  font-size:32px;
 }
 
 #rightBtn{
   left:115px;
+  font-size:32px;
+}
+
+#attackBtn{
+  right:135px;
+
+  width:90px;
+  height:90px;
+
+  background:rgba(40,90,220,.82);
+
+  font-size:15px;
 }
 
 #jumpBtn{
@@ -448,25 +516,42 @@ html,body{
 
   font-size:18px;
 }
+
 </style>
 </head>
 
 <body>
 
 <div id="hud">
-  <div id="score">COIN × 0</div>
-  <div id="life">LIFE ❤️❤️❤️</div>
+
+  <div id="score">
+    COIN × 0
+  </div>
+
+  <div id="life">
+    LIFE ❤️❤️❤️
+  </div>
+
 </div>
+
 
 <div id="game">
 
 <div id="world">
 
+  <!-- 主人公 -->
+
   <div id="player">
+
     <div id="heroSprite"></div>
+
+    <div id="slash"></div>
+
   </div>
 
+
   <div class="ground"></div>
+
 
   <!-- 足場 -->
 
@@ -484,6 +569,7 @@ html,body{
 
   <div class="platform"
   style="left:2460px;top:255px;width:190px;"></div>
+
 
   <!-- コイン -->
 
@@ -505,60 +591,125 @@ html,body{
   <div class="coin"
   style="left:2780px;top:375px;"></div>
 
+
   <!-- 敵 -->
 
   <div class="enemy" id="enemy1">
+
     <div class="enemyBody"></div>
+
     <div class="enemyBelly"></div>
+
     <div class="enemyHat"></div>
+
     <div class="enemyHatBall"></div>
+
     <div class="enemyEye left"></div>
+
     <div class="enemyEye right"></div>
+
     <div class="enemyBeak"></div>
+
     <div class="enemyScarf"></div>
+
     <div class="enemyFoot left"></div>
+
     <div class="enemyFoot right"></div>
+
   </div>
+
 
   <div class="enemy" id="enemy2">
+
     <div class="enemyBody"></div>
+
     <div class="enemyBelly"></div>
+
     <div class="enemyHat"></div>
+
     <div class="enemyHatBall"></div>
+
     <div class="enemyEye left"></div>
+
     <div class="enemyEye right"></div>
+
     <div class="enemyBeak"></div>
+
     <div class="enemyScarf"></div>
+
     <div class="enemyFoot left"></div>
+
     <div class="enemyFoot right"></div>
+
   </div>
+
 
   <div class="enemy" id="enemy3">
+
     <div class="enemyBody"></div>
+
     <div class="enemyBelly"></div>
+
     <div class="enemyHat"></div>
+
     <div class="enemyHatBall"></div>
+
     <div class="enemyEye left"></div>
+
     <div class="enemyEye right"></div>
+
     <div class="enemyBeak"></div>
+
     <div class="enemyScarf"></div>
+
     <div class="enemyFoot left"></div>
+
     <div class="enemyFoot right"></div>
+
   </div>
 
+
+  <!-- ゴール -->
+
   <div id="goalPole"></div>
+
   <div id="flag"></div>
 
 </div>
+
 </div>
+
 
 <!-- iPhone操作 -->
 
 <div id="controls">
-  <button class="control" id="leftBtn">←</button>
-  <button class="control" id="rightBtn">→</button>
-  <button class="control" id="jumpBtn">JUMP</button>
+
+  <button
+  class="control"
+  id="leftBtn">
+  ←
+  </button>
+
+  <button
+  class="control"
+  id="rightBtn">
+  →
+  </button>
+
+  <button
+  class="control"
+  id="attackBtn">
+  ATTACK
+  </button>
+
+  <button
+  class="control"
+  id="jumpBtn">
+  JUMP
+  </button>
+
 </div>
+
 
 <!-- 終了画面 -->
 
@@ -574,6 +725,7 @@ html,body{
 
 </div>
 
+
 <script>
 
 const world =
@@ -584,6 +736,9 @@ document.getElementById("player");
 
 const hero =
 document.getElementById("heroSprite");
+
+const slash =
+document.getElementById("slash");
 
 const platforms =
 document.querySelectorAll(".platform");
@@ -622,6 +777,7 @@ const playerH = 84;
 const groundY = 336;
 
 const gravity = 0.8;
+
 const jumpPower = -15;
 
 let onGround = true;
@@ -632,16 +788,6 @@ let facingRight = true;
 /* =====================
    主人公アニメ
 ===================== */
-
-/*
-
-0 = 停止
-
-1～4 = 走り
-
-5 = ジャンプ
-
-*/
 
 let runFrame = 1;
 
@@ -661,6 +807,162 @@ function setHeroFrame(frame){
 
   hero.style.backgroundPosition =
   positions[frame] + "% 0";
+
+}
+
+
+/* =====================
+   攻撃
+===================== */
+
+let attackActive = false;
+
+let attackTimer = 0;
+
+let attackCooldown = 0;
+
+
+function startAttack(){
+
+  if(
+    attackCooldown > 0 ||
+    gameEnded
+  ){
+    return;
+  }
+
+
+  attackActive = true;
+
+  attackTimer = 12;
+
+  attackCooldown = 24;
+
+
+  slash.className = "";
+
+
+  if(facingRight){
+
+    slash.classList.add(
+      "right"
+    );
+
+  }
+
+  else{
+
+    slash.classList.add(
+      "left"
+    );
+
+  }
+
+}
+
+
+function updateAttack(){
+
+  if(attackCooldown > 0){
+
+    attackCooldown--;
+
+  }
+
+
+  if(!attackActive){
+
+    return;
+
+  }
+
+
+  attackTimer--;
+
+
+  /* 攻撃判定 */
+
+  let attackX;
+
+
+  if(facingRight){
+
+    attackX =
+    x + playerW - 5;
+
+  }
+
+  else{
+
+    attackX =
+    x - 65;
+
+  }
+
+
+  const attackY =
+  y + 15;
+
+
+  enemies.forEach(
+  function(enemy){
+
+    if(!enemy.alive){
+
+      return;
+
+    }
+
+
+    if(
+
+      hit(
+
+        attackX,
+        attackY,
+        70,
+        55,
+
+        enemy.x,
+        enemy.y,
+        enemy.w,
+        enemy.h
+
+      )
+
+    ){
+
+      enemy.alive =
+      false;
+
+
+      enemy.el.style.display =
+      "none";
+
+
+      score += 5;
+
+
+      scoreText.textContent =
+      "COIN × " +
+      score;
+
+    }
+
+  });
+
+
+  if(attackTimer <= 0){
+
+    attackActive =
+    false;
+
+
+    slash.className =
+    "";
+
+  }
+
 }
 
 
@@ -689,15 +991,23 @@ const keys = {};
 
 const coins = [];
 
-coinElements.forEach(function(el){
+
+coinElements.forEach(
+function(el){
 
   coins.push({
 
     el:el,
 
-    x:parseInt(el.style.left),
+    x:
+    parseInt(
+      el.style.left
+    ),
 
-    y:parseInt(el.style.top),
+    y:
+    parseInt(
+      el.style.top
+    ),
 
     taken:false
 
@@ -713,7 +1023,10 @@ coinElements.forEach(function(el){
 const enemies = [
 
 {
-  el:document.getElementById("enemy1"),
+  el:
+  document.getElementById(
+    "enemy1"
+  ),
 
   x:750,
   y:366,
@@ -736,7 +1049,10 @@ const enemies = [
 },
 
 {
-  el:document.getElementById("enemy2"),
+  el:
+  document.getElementById(
+    "enemy2"
+  ),
 
   x:1700,
   y:366,
@@ -759,7 +1075,10 @@ const enemies = [
 },
 
 {
-  el:document.getElementById("enemy3"),
+  el:
+  document.getElementById(
+    "enemy3"
+  ),
 
   x:2580,
   y:366,
@@ -793,17 +1112,17 @@ ax,ay,aw,ah,
 bx,by,bw,bh
 ){
 
-return(
+  return(
 
-ax < bx+bw &&
+    ax < bx+bw &&
 
-ax+aw > bx &&
+    ax+aw > bx &&
 
-ay < by+bh &&
+    ay < by+bh &&
 
-ay+ah > by
+    ay+ah > by
 
-);
+  );
 
 }
 
@@ -830,7 +1149,9 @@ function damage(){
     return;
   }
 
+
   life--;
+
 
   updateLife();
 
@@ -839,31 +1160,38 @@ function damage(){
 
     gameEnded = true;
 
+
     showEnd(
+
       "GAME OVER",
+
       "ライフがなくなりました"
+
     );
 
+
     return;
+
   }
 
-
-  /* ノックバック */
 
   x -= 80;
 
+
   if(x < 0){
+
     x = 0;
+
   }
+
 
   vy = -5;
 
 
-  /* 無敵時間 */
-
   invincible = true;
 
   invincibleTimer = 100;
+
 
   hero.classList.add(
     "invincible"
@@ -876,7 +1204,10 @@ function damage(){
    終了画面
 ===================== */
 
-function showEnd(title,text){
+function showEnd(
+title,
+text
+){
 
   messageTitle.textContent =
   title;
@@ -897,6 +1228,7 @@ function showEnd(title,text){
 document.addEventListener(
 "keydown",
 function(e){
+
 
   keys[e.key] = true;
 
@@ -919,6 +1251,17 @@ function(e){
   }
 
 
+  /* Xキーで攻撃 */
+
+  if(
+    e.code === "KeyX"
+  ){
+
+    startAttack();
+
+  }
+
+
   if(
     e.key === "ArrowLeft" ||
     e.key === "ArrowRight" ||
@@ -937,7 +1280,8 @@ document.addEventListener(
 "keyup",
 function(e){
 
-  keys[e.key] = false;
+  keys[e.key] =
+  false;
 
 });
 
@@ -951,56 +1295,67 @@ button,
 key
 ){
 
-button.addEventListener(
-"pointerdown",
-function(e){
+  button.addEventListener(
+  "pointerdown",
+  function(e){
 
-  e.preventDefault();
+    e.preventDefault();
 
-  keys[key] = true;
+    keys[key] =
+    true;
 
-});
-
-
-button.addEventListener(
-"pointerup",
-function(){
-
-  keys[key] = false;
-
-});
+  });
 
 
-button.addEventListener(
-"pointercancel",
-function(){
+  button.addEventListener(
+  "pointerup",
+  function(){
 
-  keys[key] = false;
+    keys[key] =
+    false;
 
-});
+  });
+
+
+  button.addEventListener(
+  "pointercancel",
+  function(){
+
+    keys[key] =
+    false;
+
+  });
 
 }
 
 
 holdButton(
+
 document.getElementById(
-"leftBtn"
+  "leftBtn"
 ),
+
 "ArrowLeft"
+
 );
 
 
 holdButton(
+
 document.getElementById(
-"rightBtn"
+  "rightBtn"
 ),
+
 "ArrowRight"
+
 );
 
 
+/* ジャンプ */
+
 document
 .getElementById(
-"jumpBtn"
+  "jumpBtn"
 )
 .addEventListener(
 "pointerdown",
@@ -1014,17 +1369,37 @@ function(e){
     !gameEnded
   ){
 
-    vy = jumpPower;
+    vy =
+    jumpPower;
 
-    onGround = false;
+
+    onGround =
+    false;
 
   }
 
 });
 
 
+/* 攻撃 */
+
+document
+.getElementById(
+  "attackBtn"
+)
+.addEventListener(
+"pointerdown",
+function(e){
+
+  e.preventDefault();
+
+  startAttack();
+
+});
+
+
 /* =====================
-   敵
+   敵更新
 ===================== */
 
 function updateEnemies(){
@@ -1033,7 +1408,9 @@ enemies.forEach(
 function(enemy){
 
   if(!enemy.alive){
+
     return;
+
   }
 
 
@@ -1048,6 +1425,7 @@ function(enemy){
 
     enemy.x =
     enemy.minX;
+
 
     enemy.vx =
     Math.abs(
@@ -1065,6 +1443,7 @@ function(enemy){
     enemy.x =
     enemy.maxX;
 
+
     enemy.vx =
     -Math.abs(
       enemy.vx
@@ -1073,7 +1452,7 @@ function(enemy){
   }
 
 
-  /* たまにジャンプ */
+  /* 敵がたまにジャンプ */
 
   if(
     enemy.onGround &&
@@ -1082,6 +1461,7 @@ function(enemy){
 
     enemy.vy =
     enemy.jump;
+
 
     enemy.onGround =
     false;
@@ -1101,9 +1481,13 @@ function(enemy){
     enemy.y >= 366
   ){
 
-    enemy.y = 366;
+    enemy.y =
+    366;
 
-    enemy.vy = 0;
+
+    enemy.vy =
+    0;
+
 
     enemy.onGround =
     true;
@@ -1124,30 +1508,35 @@ function(enemy){
 
 
 /* =====================
-   プレイヤー
+   主人公更新
 ===================== */
 
 function updatePlayer(){
 
 if(gameEnded){
+
   return;
+
 }
 
 
-let moving = false;
+let moving =
+false;
 
 
 /* 右 */
 
 if(
-keys["ArrowRight"]
+  keys["ArrowRight"]
 ){
 
   x += 6;
 
-  moving = true;
+  moving =
+  true;
 
-  facingRight = true;
+  facingRight =
+  true;
 
 }
 
@@ -1155,52 +1544,68 @@ keys["ArrowRight"]
 /* 左 */
 
 if(
-keys["ArrowLeft"]
+  keys["ArrowLeft"]
 ){
 
   x -= 6;
 
-  moving = true;
+  moving =
+  true;
 
-  facingRight = false;
+  facingRight =
+  false;
 
 }
 
 
 if(x < 0){
+
   x = 0;
+
 }
 
 
 if(x > 3140){
+
   x = 3140;
+
 }
 
 
 /* 重力 */
 
-const oldY = y;
+const oldY =
+y;
 
 
-vy += gravity;
+vy +=
+gravity;
 
-y += vy;
+
+y +=
+vy;
 
 
-onGround = false;
+onGround =
+false;
 
 
 /* 地面 */
 
 if(
-y >= groundY
+  y >= groundY
 ){
 
-  y = groundY;
+  y =
+  groundY;
 
-  vy = 0;
 
-  onGround = true;
+  vy =
+  0;
+
+
+  onGround =
+  true;
 
 }
 
@@ -1210,55 +1615,62 @@ y >= groundY
 platforms.forEach(
 function(platform){
 
-const px =
-parseInt(
-platform.style.left
-);
 
-const py =
-parseInt(
-platform.style.top
-);
-
-const pw =
-parseInt(
-platform.style.width
-);
+  const px =
+  parseInt(
+    platform.style.left
+  );
 
 
-const oldBottom =
-oldY +
-playerH;
+  const py =
+  parseInt(
+    platform.style.top
+  );
 
 
-const newBottom =
-y +
-playerH;
+  const pw =
+  parseInt(
+    platform.style.width
+  );
 
 
-if(
+  const oldBottom =
+  oldY +
+  playerH;
 
-x + playerW > px &&
 
-x < px + pw &&
+  const newBottom =
+  y +
+  playerH;
 
-vy >= 0 &&
 
-oldBottom <= py &&
+  if(
 
-newBottom >= py
+    x + playerW > px &&
 
-){
+    x < px + pw &&
 
-y =
-py -
-playerH;
+    vy >= 0 &&
 
-vy = 0;
+    oldBottom <= py &&
 
-onGround = true;
+    newBottom >= py
 
-}
+  ){
+
+    y =
+    py -
+    playerH;
+
+
+    vy =
+    0;
+
+
+    onGround =
+    true;
+
+  }
 
 });
 
@@ -1282,14 +1694,19 @@ else if(moving){
     animationCounter > 6
   ){
 
-    animationCounter = 0;
+    animationCounter =
+    0;
+
 
     runFrame++;
 
 
-    if(runFrame > 4){
+    if(
+      runFrame > 4
+    ){
 
-      runFrame = 1;
+      runFrame =
+      1;
 
     }
 
@@ -1309,7 +1726,7 @@ else{
 }
 
 
-/* 左右向き */
+/* 左右の向き */
 
 if(facingRight){
 
@@ -1326,160 +1743,172 @@ else{
 }
 
 
-/* =====================
-   コイン
-===================== */
+/* コイン */
 
 coins.forEach(
 function(coin){
 
-if(coin.taken){
-  return;
-}
+  if(coin.taken){
+
+    return;
+
+  }
 
 
-if(
+  if(
 
-hit(
+    hit(
 
-x,
-y,
-playerW,
-playerH,
+      x,
+      y,
+      playerW,
+      playerH,
 
-coin.x,
-coin.y,
-28,
-28
+      coin.x,
+      coin.y,
+      28,
+      28
 
-)
+    )
 
-){
+  ){
 
-coin.taken = true;
+    coin.taken =
+    true;
 
-coin.el.style.display =
-"none";
 
-score++;
+    coin.el.style.display =
+    "none";
 
-scoreText.textContent =
-"COIN × " +
-score;
 
-}
+    score++;
+
+
+    scoreText.textContent =
+    "COIN × " +
+    score;
+
+  }
 
 });
 
 
-/* =====================
-   敵との接触
-===================== */
+/* 敵との接触 */
 
 enemies.forEach(
 function(enemy){
 
-if(!enemy.alive){
-  return;
-}
+  if(
+    !enemy.alive
+  ){
+
+    return;
+
+  }
 
 
-if(
+  if(
 
-hit(
+    hit(
 
-x,
-y,
-playerW,
-playerH,
+      x,
+      y,
+      playerW,
+      playerH,
 
-enemy.x,
-enemy.y,
-enemy.w,
-enemy.h
+      enemy.x,
+      enemy.y,
+      enemy.w,
+      enemy.h
 
-)
+    )
 
-){
+  ){
 
-const oldBottom =
-oldY +
-playerH;
-
-
-/* 上から踏む */
-
-if(
-
-vy > 0 &&
-
-oldBottom <=
-enemy.y + 14
-
-){
-
-enemy.alive =
-false;
-
-enemy.el.style.display =
-"none";
-
-vy = -10;
-
-score += 3;
-
-scoreText.textContent =
-"COIN × " +
-score;
-
-}
+    const oldBottom =
+    oldY +
+    playerH;
 
 
-/* 横から */
+    /* 上から踏む */
 
-else{
+    if(
 
-damage();
+      vy > 0 &&
 
-}
+      oldBottom <=
+      enemy.y + 14
 
-}
+    ){
+
+      enemy.alive =
+      false;
+
+
+      enemy.el.style.display =
+      "none";
+
+
+      vy =
+      -10;
+
+
+      score +=
+      3;
+
+
+      scoreText.textContent =
+      "COIN × " +
+      score;
+
+    }
+
+
+    /* 横から */
+
+    else{
+
+      damage();
+
+    }
+
+  }
 
 });
 
 
-/* =====================
-   ゴール
-===================== */
+/* ゴール */
 
 if(
 
-hit(
+  hit(
 
-x,
-y,
-playerW,
-playerH,
+    x,
+    y,
+    playerW,
+    playerH,
 
-2940,
-175,
-130,
-245
+    2940,
+    175,
+    130,
+    245
 
-)
+  )
 
 ){
 
-gameEnded = true;
+  gameEnded =
+  true;
 
-showEnd(
 
-"GAME CLEAR!",
+  showEnd(
 
-"スコア：" +
-score
+    "GAME CLEAR!",
 
-);
+    "スコア：" +
+    score
+
+  );
 
 }
 
@@ -1487,30 +1916,34 @@ score
 
 
 /* =====================
-   無敵
+   無敵時間
 ===================== */
 
 function updateInvincible(){
 
-if(!invincible){
-  return;
-}
+  if(!invincible){
+
+    return;
+
+  }
 
 
-invincibleTimer--;
+  invincibleTimer--;
 
 
-if(
-invincibleTimer <= 0
-){
+  if(
+    invincibleTimer <= 0
+  ){
 
-invincible = false;
+    invincible =
+    false;
 
-hero.classList.remove(
-"invincible"
-);
 
-}
+    hero.classList.remove(
+      "invincible"
+    );
+
+  }
 
 }
 
@@ -1521,53 +1954,56 @@ hero.classList.remove(
 
 function updateScreen(){
 
-player.style.left =
-x + "px";
+  player.style.left =
+  x + "px";
 
 
-player.style.top =
-y + "px";
+  player.style.top =
+  y + "px";
 
 
-cameraX =
+  cameraX =
 
-x -
+  x -
 
-window.innerWidth *
-0.35;
-
-
-if(cameraX < 0){
-
-  cameraX = 0;
-
-}
+  window.innerWidth *
+  0.35;
 
 
-const maxCamera =
+  if(
+    cameraX < 0
+  ){
 
-3200 -
+    cameraX =
+    0;
 
-window.innerWidth;
-
-
-if(
-cameraX >
-maxCamera
-){
-
-cameraX =
-Math.max(
-0,
-maxCamera
-);
-
-}
+  }
 
 
-world.style.left =
--cameraX +
-"px";
+  const maxCamera =
+
+  3200 -
+
+  window.innerWidth;
+
+
+  if(
+    cameraX >
+    maxCamera
+  ){
+
+    cameraX =
+    Math.max(
+      0,
+      maxCamera
+    );
+
+  }
+
+
+  world.style.left =
+  -cameraX +
+  "px";
 
 }
 
@@ -1578,17 +2014,20 @@ world.style.left =
 
 function loop(){
 
-updatePlayer();
+  updatePlayer();
 
-updateEnemies();
+  updateEnemies();
 
-updateInvincible();
+  updateAttack();
 
-updateScreen();
+  updateInvincible();
 
-requestAnimationFrame(
-loop
-);
+  updateScreen();
+
+
+  requestAnimationFrame(
+    loop
+  );
 
 }
 
@@ -1597,13 +2036,13 @@ loop
 
 document
 .getElementById(
-"restart"
+  "restart"
 )
 .addEventListener(
 "click",
 function(){
 
-location.reload();
+  location.reload();
 
 });
 
